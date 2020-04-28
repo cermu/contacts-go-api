@@ -26,7 +26,7 @@ type Account struct {
 	Token string `json:"token";sql:"-"`
 }
 
-// Validate incoming user details
+// Validate incoming data from client
 func(account *Account) Validate() (map[string] interface{}, bool) {
 	if !strings.Contains(account.Email, "@") {
 		return utl.Message(false, "Email address is required"), false
@@ -53,7 +53,7 @@ func(account *Account) Validate() (map[string] interface{}, bool) {
 
 }
 
-// Create method that adds an account in DB
+// Create method that create a new account and generates a JWT token
 func(account *Account) Create() map[string] interface{} {
 	if resp, ok := account.Validate(); !ok {
 		return resp
@@ -82,7 +82,7 @@ func(account *Account) Create() map[string] interface{} {
 	return response
 }
 
-// Login function to sign in users
+// Login function to authenticate a user and generate a JWT token
 func Login(email, password string) map[string]interface{} {
 	accountPointer := &Account{}
 	err := GetDB().Table("accounts").Where("email =?", email).First(accountPointer).Error
