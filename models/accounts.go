@@ -39,10 +39,15 @@ func(account *Account) Validate() (map[string] interface{}, bool) {
 	// Email must be unique
 	temp := &Account{}
 
+	// fmt.Println(account.Email)
+	// fmt.Println(temp.Email)
+	// fmt.Println("=================================")
+
 	// check for errors and duplicate emails
-	err := GetDB().Table("accounts").Where("email = ?", account.Email).First(temp)
-	if err != nil {
+	err := GetDB().Table("accounts").Where("email = ?", account.Email).First(temp).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
 		fmt.Println(err)
+		// fmt.Println("check here")
 		return utl.Message(false, "Connection error, please retry"), false
 	}
 
@@ -63,8 +68,6 @@ func(account *Account) Create() map[string] interface{} {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), bcrypt.DefaultCost)
 	account.Password = string(hashedPassword)
 
-	GetDB().Create(account)
-
 	if account.ID <= 0 {
 		return utl.Message(false, "Failed to create account, try again.")
 	}
@@ -74,6 +77,8 @@ func(account *Account) Create() map[string] interface{} {
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	account.Token = tokenString
+
+	GetDB().Create(account) // Save the account in DB
 
 	account.Password = "" // delete password
 

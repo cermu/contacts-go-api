@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// CreateAccount handler for creating new users
 var CreateAccount = func(w http.ResponseWriter, r *http.Request) {
 	accountPointer := &models.Account{}
 	err := json.NewDecoder(r.Body).Decode(accountPointer) // decode the request body into a struct
@@ -19,6 +20,7 @@ var CreateAccount = func(w http.ResponseWriter, r *http.Request) {
 	utl.Respond(w, resp)
 }
 
+// Authenticate handler for authenticating users
 var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	accountPointer := &models.Account{}
 	err := json.NewDecoder(r.Body).Decode(accountPointer) // decode the request body into a struct
