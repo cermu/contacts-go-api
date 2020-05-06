@@ -11,12 +11,14 @@ import (
 
 func main() {
 	fmt.Println("Starting the application...")
-	router := mux.NewRouter()
+	router := mux.NewRouter().StrictSlash(true)
 	router.Use(app.JwtAuthentication) // Attach the JWT auth middleware
 
 	// Registering endpoints and their corresponding request handlers
 	router.HandleFunc("/api/user/new", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/api/user/{userId}/contacts", controllers.GetContactsFor).Methods("GET")
+	router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
 
 	port := os.Getenv("application_port")
 	if port == "" {

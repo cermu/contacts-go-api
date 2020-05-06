@@ -13,5 +13,5 @@ func Message(status bool, message string) map[string]interface{} {
 // Respond function responds with json message
 func Respond(w http.ResponseWriter, data map[string]interface{}) {
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }
