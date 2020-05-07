@@ -5,16 +5,19 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"log"
 	"os"
 )
 
 var db *gorm.DB // database
 
 func init() {
-	fmt.Println("Initializing database...")
+	// fmt.Println("Initializing database...")
+	log.Println("Initializing database...")
 	e := godotenv.Load() // Load .env file
 	if e != nil {
-		fmt.Print(e)
+		// fmt.Print(e)
+		log.Fatalf("The following error occurred while loading env file: %s", e)
 	}
 
 	username := os.Getenv("db_user")
@@ -29,9 +32,10 @@ func init() {
 
 	conn, err := gorm.Open(dbType, dbUri)
 	if err != nil {
-		fmt.Print(err)
-		fmt.Printf("Initializing database \t")
-		fmt.Println("[FAIL]")
+		// fmt.Print(err)
+		// fmt.Printf("Initializing database \t [FAIL]")
+		log.Printf("Initializing database \t [FAIL]")
+		log.Printf("The following error occurred while oppeinig DB connection: %s", err)
 	}
 
 	db = conn
@@ -39,8 +43,8 @@ func init() {
 	// db.Debug().AutoMigrate(&Account{}) // Database migration
 
 	if err == nil {
-		fmt.Printf("Initializing database \t")
-		fmt.Println("[OK]")
+		// fmt.Printf("Initializing database \t [OK]")
+		log.Printf("Initializing database \t [OK]")
 	}
 }
 

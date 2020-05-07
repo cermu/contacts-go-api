@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"my-contacts/app"
 	"my-contacts/controllers"
 	"net/http"
@@ -10,7 +11,8 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting the application...")
+	log.Println("*********************************")
+	log.Println("Starting the application...")
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(app.JwtAuthentication) // Attach the JWT auth middleware
 	api := router.PathPrefix("/api/v1").Subrouter()
@@ -26,7 +28,7 @@ func main() {
 		port = "8000"
 	}
 
-	fmt.Printf("Application is running on port: %v \n", port)
+	log.Printf("Application is running on port: %v \n", port)
 
 	err := http.ListenAndServe(":" + port, router) // Launch the app
 	if err != nil {
