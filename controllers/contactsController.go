@@ -28,8 +28,9 @@ var CreateContact = func(w http.ResponseWriter, r *http.Request) {
 
 	contactPointer.UserId = user
 	resp := contactPointer.Create()
+	responseBody, _ := json.Marshal(resp)
 
-	utl.WriteToFile(fmt.Sprintf("INFO | Type = Response | Target System = | Message = %v", resp))
+	utl.WriteToFile(fmt.Sprintf("INFO | Type = Response | Target System = | Response Body = %s", responseBody))
 	utl.Respond(w, resp)
 }
 
