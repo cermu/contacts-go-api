@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -63,4 +65,22 @@ func WriteToFile(msg string) {
 
 		defer f.Close()
 	}
+}
+
+// RetrieveRequestBody function that retrieves the body from POST request
+func RetrieveRequestBody(r *http.Request) (string, io.ReadCloser) {
+	// r.Body is a buffer, which means,
+	// once it has been read, it cannot be read again.
+	// Catch the body and restore it for other uses.
+	// rdr1 will be used for logging .
+	// rdr2 will be used for normal request processing.
+
+	body, bodyErr := ioutil.ReadAll(r.Body)
+	if bodyErr != nil {
+		// fmt.Println(bodyErr)
+		WriteToFile(fmt.Sprintf("ERROR | The following ioutil.ReadAll error occurred: %s", bodyErr))
+	}
+	requestBody1 := string(body)
+	requestBody2 := ioutil.NopCloser(bytes.NewBuffer(body))
+	return requestBody1, requestBody2
 }
