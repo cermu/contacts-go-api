@@ -44,3 +44,13 @@
 2020/05/08 04:28:34 *********************************
 2020/05/08 04:28:34 INFO | Starting the application...
 2020/05/08 04:28:34 INFO | Application is running on port: 8080
+2020/05/08 22:11:29 INFO | Initializing database...
+2020/05/08 22:11:29 INFO | Initializing database 	 [OK]
+2020/05/08 22:11:29 *************************************
+2020/05/08 22:11:29 INFO | Starting the application...
+2020/05/08 22:11:29 INFO | Application is running on port: 8080
+2020/05/08 22:11:43 INFO | Type = Request | Source = localhost:8080 | Target System = | Request Body = {
+	"name":"cont three",
+	"phone":"123456389"
+}
+2020/05/08 22:11:43 INFO | Type = Response | Target System = | Response Body = {"message":"Phone number already exists","status":false}
