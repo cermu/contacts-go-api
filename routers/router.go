@@ -5,7 +5,7 @@ import (
 	"my-contacts/app"
 )
 
-// NewRouter1 function for registering endpoints and their handlers.
+// NewRouter function for registering endpoints and their handlers.
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(app.JwtAuthentication) // Attach the JWT middleware
