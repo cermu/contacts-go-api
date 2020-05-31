@@ -42,7 +42,7 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&Account{}, &Contact{}) // Database migration
+	db.Debug().AutoMigrate(&Account{}, &Contact{}, &AuthDetails{}) // Database migration
 	// db.Debug().AutoMigrate(&Account{}) // Database migration
 
 	if err == nil {

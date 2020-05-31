@@ -2,12 +2,13 @@ package models
 
 import (
 	"fmt"
+	"github.com/badoux/checkmail"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
+	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
 	utl "my-contacts/utils"
 	"os"
-	"strings"
 )
 
 /*
@@ -15,6 +16,7 @@ JWT claims struct, has one claim, UserId
 */
 type Token struct {
 	UserId uint
+	AuthUUID string
 	jwt.StandardClaims
 }
 
@@ -28,8 +30,12 @@ type Account struct {
 
 // Validate incoming data from client
 func(account *Account) Validate() (map[string] interface{}, bool) {
-	if !strings.Contains(account.Email, "@") {
-		return utl.Message(false, "Email address is required"), false
+	//if !strings.Contains(account.Email, "@") {
+	//	return utl.Message(false, "Email address is required"), false
+	//}
+
+	if err := checkmail.ValidateFormat(account.Email); err != nil {
+		return utl.Message(false, "Provide a valid email address"), false
 	}
 
 	if len(account.Password) < 6 {
@@ -54,7 +60,7 @@ func(account *Account) Validate() (map[string] interface{}, bool) {
 	if temp.Email != "" {
 		return utl.Message(false, "Email address is already taken"), false
 	}
-	return utl.Message(true, "Requirement passed"), true
+	return utl.Message(true, "Requirements passed"), true
 
 }
 
@@ -73,7 +79,7 @@ func(account *Account) Create() map[string] interface{} {
 	}
 
 	// Create new JWT token for newly registered account
-	tk := &Token{UserId: account.ID}
+	tk := &Token{UserId: account.ID, AuthUUID: uuid.NewV4().String()}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk) // Add claim 'tk' to the token
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	account.Token = tokenString
@@ -107,7 +113,7 @@ func Login(email, password string) map[string]interface{} {
 	accountPointer.Password = ""
 
 	// Create JWT token
-	tk := &Token{UserId: accountPointer.ID}
+	tk := &Token{UserId: accountPointer.ID, AuthUUID: uuid.NewV4().String()}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	accountPointer.Token = tokenString // Store the token in the response
@@ -120,8 +126,24 @@ func Login(email, password string) map[string]interface{} {
 // GetUser function to fetch a user account, returns an Account pointer
 func GetUser(u uint) *Account {
 	accountPointer := &Account{}
-	GetDB().Table("accounts").Where("id = ?", u).First(accountPointer)
+	err := GetDB().Table("accounts").Where("id = ?", u).First(accountPointer).Error
+	if err != nil {
+		return nil
+	}
+
 	if accountPointer.Email == "" { // User not found
+		return nil
+	}
+
+	accountPointer.Password = ""
+	return accountPointer
+}
+
+// GetUserByMail function to fetch and return an account using the passed email address
+func GetUserByMail(email string) *Account {
+	accountPointer := &Account{}
+	err := GetDB().Table("accounts").Where("email = ?", email).First(accountPointer).Error
+	if err != nil {
 		return nil
 	}
 
