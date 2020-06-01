@@ -23,10 +23,9 @@ func FetchAuthDetails(tokenClaims *Token) (*AuthDetails, error) {
 }
 
 // DeleteAuthDetails function to delete authentication details once a user logs out
-func DeleteAuthDetails(tokenClaims *Token) error {
+func DeleteAuthDetails(id uint) error {
 	authDetailsPointer := &AuthDetails{}
-	err := GetDB().Table("auth_details").Where("user_id = ? AND auth_uuid = ?",
-		tokenClaims.UserId, tokenClaims.AuthUUID).Delete(authDetailsPointer).Error
+	err := GetDB().Table("auth_details").Where("user_id = ?", id).Delete(authDetailsPointer).Error
 	if err != nil {
 		return err
 	}
@@ -34,15 +33,32 @@ func DeleteAuthDetails(tokenClaims *Token) error {
 }
 
 // SaveAuthDetails function to save authentication details once a user login/sign up
-func SaveAuthDetails(id uint) error {
+func SaveAuthDetails(id uint) (*AuthDetails, error) {
 	authDetailsPointer := &AuthDetails{}
 	authDetailsPointer.UserID = id
 	authDetailsPointer.AuthUUID = uuid.NewV4().String()
 
-	err := GetDB().Create(*authDetailsPointer).Error
-	if err != nil {
-		return err
+	// Check if user has auth details already
+	temp := &AuthDetails{}
+	tempError := GetDB().Table("auth_details").Where("user_id = ?", id).First(temp).Error
+	if tempError != nil {
+		if tempError == gorm.ErrRecordNotFound {
+			fError := GetDB().Create(&authDetailsPointer).Error
+			if fError != nil {
+				return nil, fError
+			}
+			return authDetailsPointer, nil
+		}
+		return nil, tempError
 	}
-	return nil
+	if temp.UserID != 0 {
+		return temp, nil
+	}
+
+	err := GetDB().Create(&authDetailsPointer).Error
+	if err != nil {
+		return nil, err
+	}
+	return authDetailsPointer, nil
 }
 

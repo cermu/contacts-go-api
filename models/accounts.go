@@ -5,7 +5,7 @@ import (
 	"github.com/badoux/checkmail"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"github.com/twinj/uuid"
+	_ "github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
 	utl "my-contacts/utils"
 	"os"
@@ -23,7 +23,7 @@ type Token struct {
 //  Account struct
 type Account struct {
 	gorm.Model
-	Email string `json:"email"`
+	Email string `gorm:"size:255;not null;unique" json:"email"`
 	Password string `json:"password"`
 	Token string `json:"token";sql:"-"`
 }
@@ -74,17 +74,23 @@ func(account *Account) Create() map[string] interface{} {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(account.Password), bcrypt.DefaultCost)
 	account.Password = string(hashedPassword)
 
+	GetDB().Create(account) // Save the account in DB
+
 	if account.ID <= 0 {
 		return utl.Message(false, "Failed to create account, try again.")
 	}
 
+	// Save auth details
+	authData, authError := SaveAuthDetails(account.ID)
+	if authError != nil {
+		return utl.Message(false, "The following error occurred: "+ authError.Error())
+	}
+
 	// Create new JWT token for newly registered account
-	tk := &Token{UserId: account.ID, AuthUUID: uuid.NewV4().String()}
+	tk := &Token{UserId: account.ID, AuthUUID: authData.AuthUUID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk) // Add claim 'tk' to the token
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	account.Token = tokenString
-
-	GetDB().Create(account) // Save the account in DB
 
 	account.Password = "" // delete password
 
@@ -112,14 +118,31 @@ func Login(email, password string) map[string]interface{} {
 	// If all went well
 	accountPointer.Password = ""
 
+	// Save auth details
+	authData, authError := SaveAuthDetails(accountPointer.ID)
+	if authError != nil {
+		return utl.Message(false, "The following error occurred: " + authError.Error())
+	}
+
 	// Create JWT token
-	tk := &Token{UserId: accountPointer.ID, AuthUUID: uuid.NewV4().String()}
+	tk := &Token{UserId: accountPointer.ID, AuthUUID: authData.AuthUUID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	accountPointer.Token = tokenString // Store the token in the response
 
 	resp := utl.Message(true, "Logged In")
 	resp["account"] = accountPointer
+	return resp
+}
+
+// Logout function to delete auth details and log out a user
+func Logout(id uint) map[string]interface{} {
+	err := DeleteAuthDetails(id)
+	if err != nil {
+		return utl.Message(false, "The following error occurred: " + err.Error())
+	}
+
+	resp := utl.Message(true, "Logged out successfully")
 	return resp
 }
 

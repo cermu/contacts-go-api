@@ -32,3 +32,11 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	resp := models.Login(accountPointer.Email, accountPointer.Password)
 	utl.Respond(w, resp)
 }
+
+// UserLogout handler for logging out users
+var UserLogout = func(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value("user").(uint)
+	resp := models.Logout(userId)
+
+	utl.Respond(w, resp)
+}

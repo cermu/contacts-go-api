@@ -39,4 +39,10 @@ var routes = Routes{
 		Pattern:     "/user/{userId}/contacts",
 		HandlerFunc: controllers.GetContactsFor,
 	},
+	Route{
+		Name:        "UserLogout",
+		Method:      "GET",
+		Pattern:     "/user/logout",
+		HandlerFunc: controllers.UserLogout,
+	},
 }

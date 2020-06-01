@@ -24,7 +24,8 @@ func middleware(next http.Handler) http.Handler {
 // JwtAuthentication middleware
 var JwtAuthentication = func (next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		notAuth := []string{"/api/user/new", "/api/user/login"} // Slice of paths that does not require authentication
+		// Slice of paths that does not require authentication
+		notAuth := []string{"/api/v1/user/new", "/api/v1/user/login"}
 		requestPath := r.URL.Path // current path
 
 		// check if request does not need authentication

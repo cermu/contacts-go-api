@@ -10,7 +10,7 @@ import (
 type Contact struct {
 	gorm.Model
 	Name string `json:"name"`
-	Phone string `json:"phone"`
+	Phone string `gorm:"size:255;not null;unique" json:"phone"`
 	UserId uint `json:"user_id"` // The user that this contact belongs to
 }
 
