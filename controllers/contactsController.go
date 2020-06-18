@@ -11,7 +11,7 @@ import (
 )
 
 var CreateContact = func(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(uint) // Get the user that send the request
+	user := r.Context().Value("user").(uint) // Get the user that sent the request
 	contactPointer := &models.Contact{}
 
 	requestBody1, requestBody2 := utl.RetrieveRequestBody(r)

@@ -8,7 +8,7 @@ import (
 type AuthDetails struct {
 	gorm.Model
 	UserID uint `gorm:"not null" json:"user_id"`
-	AuthUUID string `gorm:"size:255;not null" json:"auth_uuid"`
+	AuthUUID string `gorm:"size:255;not null;unique" json:"auth_uuid"`
 }
 
 // FetchAuthDetails function to fetch authentication details of a user
@@ -25,7 +25,15 @@ func FetchAuthDetails(tokenClaims *Token) (*AuthDetails, error) {
 // DeleteAuthDetails function to delete authentication details once a user logs out
 func DeleteAuthDetails(id uint) error {
 	authDetailsPointer := &AuthDetails{}
-	err := GetDB().Table("auth_details").Where("user_id = ?", id).Delete(authDetailsPointer).Error
+
+	// The below two lines will soft delete the record if the model has a
+	// DeletedAt field. The field will only be updated to the current delete time.
+	err := GetDB().Table("auth_details").Where("user_id = ?", id).
+		Delete(authDetailsPointer).Error
+
+	// Uncomment the below two lines if you want to permanently delete the record
+	// err := GetDB().Table("auth_details").Where("user_id = ?", id).
+	//	Unscoped().Delete(authDetailsPointer).Error
 	if err != nil {
 		return err
 	}

@@ -100,9 +100,19 @@ var JwtAuthentication = func (next http.Handler) http.Handler {
 			return
 		}
 
+		// check if token is valid by confirming from
+		// AuthDetails that all the claims are present
+		foundAuthDetails, authDetailsError := models.FetchAuthDetails(tk)
+		if authDetailsError != nil {
+			response = utl.Message(false, "Token has expired, request a new one")
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			utl.Respond(w, response)
+			return
+		}
+
 		// Everything went well
-		// fmt.Sprintf("User %s", string(tk.UserId))
-		ctx := context.WithValue(r.Context(), "user", tk.UserId) // ctx variable to store claims
+		ctx := context.WithValue(r.Context(), "user", foundAuthDetails.UserID) // ctx variable to store claims
 		r = r.WithContext(ctx) // Setting context to request
 		next.ServeHTTP(w, r)
 	})
