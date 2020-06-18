@@ -51,7 +51,7 @@ func init() {
 	}
 }
 
-// returns a handle to the DB object
+// GetDB function which returns a handle to the DB object
 func GetDB() *gorm.DB {
 	return db
 }

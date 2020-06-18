@@ -66,8 +66,24 @@ var JwtAuthentication = func (next http.Handler) http.Handler {
 			return []byte(os.Getenv("token_password")), nil
 		})
 
+		// Malformed token, missing UUID
+		if tk.AuthUUID == "" {
+			response = utl.Message(false, "Malformed authentication token")
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			utl.Respond(w, response)
+			return
+		}
+
 		// Malformed token
 		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				response = utl.Message(false, "Malformed authentication token")
+				w.Header().Add("Content-Type", "application/json")
+				w.WriteHeader(http.StatusForbidden)
+				utl.Respond(w, response)
+				return
+			}
 			response = utl.Message(false, "Malformed authentication token")
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)

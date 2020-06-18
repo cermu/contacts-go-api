@@ -86,11 +86,20 @@ func(account *Account) Create() map[string] interface{} {
 		return utl.Message(false, "The following error occurred: "+ authError.Error())
 	}
 
+	// fmt.Printf("%#v", authData)
+
 	// Create new JWT token for newly registered account
+	//claims := jwt.MapClaims{}
+	//claims["user_id"] = account.ID
+	//claims["auth_uuid"] = authData.AuthUUID
+	//claims["authorize"] = true
+
 	tk := &Token{UserId: account.ID, AuthUUID: authData.AuthUUID}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk) // Add claim 'tk' to the token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tk) // Add claim 'tk' to the token
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	account.Token = tokenString
+
+	fmt.Println(tk.AuthUUID)
 
 	account.Password = "" // delete password
 
@@ -124,9 +133,11 @@ func Login(email, password string) map[string]interface{} {
 		return utl.Message(false, "The following error occurred: " + authError.Error())
 	}
 
+	// fmt.Printf("%#v", authData)
+
 	// Create JWT token
 	tk := &Token{UserId: accountPointer.ID, AuthUUID: authData.AuthUUID}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	accountPointer.Token = tokenString // Store the token in the response
 
