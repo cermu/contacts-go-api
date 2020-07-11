@@ -25,7 +25,7 @@ func Respond(w http.ResponseWriter, data map[string]interface{}) {
 	_ = json.NewEncoder(w).Encode(data)
 }
 
-// WriteToFile function create the logs dir and a monthly sub dir in it.
+// WriteToFile function creates the logs dir and a monthly sub dir in it.
 // Then a log file is created to store the application logs.
 func WriteToFile(msg string) {
 	e := godotenv.Load() // Load .env file
@@ -72,8 +72,8 @@ func RetrieveRequestBody(r *http.Request) (string, io.ReadCloser) {
 	// r.Body is a buffer, which means,
 	// once it has been read, it cannot be read again.
 	// Catch the body and restore it for other uses.
-	// rdr1 will be used for logging .
-	// rdr2 will be used for normal request processing.
+	// requestBody1 will be used for logging .
+	// requestBody2 will be used for normal request processing.
 
 	body, bodyErr := ioutil.ReadAll(r.Body)
 	if bodyErr != nil {
